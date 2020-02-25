@@ -132,6 +132,11 @@ void SysTick_Handler(void)
   /* USER CODE END SysTick_IRQn 1 */
 }
 
+void EXTI2_3_IRQHandler(void)
+{
+	HAL_GPIO_EXTI_IRQHandler(SWITCH_1_Pin);
+}
+
 /******************************************************************************/
 /* STM32F0xx Peripheral Interrupt Handlers                                    */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
