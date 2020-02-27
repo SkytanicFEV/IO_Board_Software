@@ -25,6 +25,8 @@
 #include "usart.h"
 #include "gpio.h"
 
+#define ADDR1 		((uint8_t) 0b10010000)
+
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -79,7 +81,19 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_UART_Receive(&huart1, rx_buffer, RX_BUFFER_SIZE, 1000);
+	  uint8_t pData[3] = "RTR";
+	  uint8_t rData[8];
+	  uint32_t Timeout = 50000;
+	 // 'RTR'
+	 HAL_I2C_Master_Transmit(&hi2c1, ADDR1 , pData, sizeof(pData), Timeout);
+
+	 HAL_I2C_Master_Receive(&hi2c1, ADDR1, rData, sizeof(rData), Timeout);
+
+
+	 rData[0]=0;
+	 rData[1]=0;
+	 rData[2]=0;
+	 rData[3]=0;
   }
   /* USER CODE END 3 */
 }
