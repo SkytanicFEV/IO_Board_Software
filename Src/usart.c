@@ -46,6 +46,9 @@ void MX_USART1_UART_Init(void)
     Error_Handler();
   }
 
+	// Configure and enable USART1 interrupt channel in NVIC
+	HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(USART1_IRQn);
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)

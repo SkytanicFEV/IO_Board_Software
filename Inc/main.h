@@ -86,9 +86,10 @@ void Error_Handler(void);
 #define MOTOR_DRIVER_1_ENABLE_PORT			GPIOF
 #define MOTOR_DRIVER_2_ENABLE_PIN			GPIO_PIN_3
 #define MOTOR_DRIVER_2_ENABLE_PORT			GPIOA
-/* USER CODE BEGIN Private defines */
 
-/* USER CODE END Private defines */
+#define RX_BUFFER_SIZE						(10U)
+
+uint8_t rx_buffer[RX_BUFFER_SIZE];
 
 #ifdef __cplusplus
 }
