@@ -151,9 +151,26 @@ void SystemClock_Config(void)
   }
 }
 
-/* USER CODE BEGIN 4 */
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	// Check to see if the output enable pin was interrupted
+	if(GPIO_Pin == SWITCH_1_Pin)
+	{
+		if(GPIOC->IDR & SWITCH_1_Pin)
+		{
+			// Set the motor enables
+			HAL_GPIO_WritePin(MOTOR_DRIVER_1_ENABLE_PORT, MOTOR_DRIVER_1_ENABLE_PIN, GPIO_PIN_SET);
+			HAL_GPIO_WritePin(MOTOR_DRIVER_2_ENABLE_PORT, MOTOR_DRIVER_2_ENABLE_PIN, GPIO_PIN_SET);
+		}
+		else
+		{
+			// Reset the motor enables
+			HAL_GPIO_WritePin(MOTOR_DRIVER_1_ENABLE_PORT, MOTOR_DRIVER_1_ENABLE_PIN, GPIO_PIN_RESET);
+			HAL_GPIO_WritePin(MOTOR_DRIVER_2_ENABLE_PORT, MOTOR_DRIVER_2_ENABLE_PIN, GPIO_PIN_RESET);
+		}
 
-/* USER CODE END 4 */
+	}
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.

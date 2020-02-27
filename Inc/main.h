@@ -77,11 +77,15 @@ void Error_Handler(void);
 #define SWITCH_1_Pin GPIO_PIN_3
 #define SWITCH_1_GPIO_Port GPIOC
 #define PGOOD_1_Pin GPIO_PIN_4
-#define PGOOD_1_GPIO_Port GPIOF
+#define PGOOD_1_GPIO_Port GPIOA
 #define PGOOD_2_Pin GPIO_PIN_5
 #define PGOOD_2_GPIO_Port GPIOF
 #define LCD_CS_Pin GPIO_PIN_4
 #define LCD_CS_GPIO_Port GPIOC
+#define MOTOR_DRIVER_1_ENABLE_PIN			GPIO_PIN_4
+#define MOTOR_DRIVER_1_ENABLE_PORT			GPIOF
+#define MOTOR_DRIVER_2_ENABLE_PIN			GPIO_PIN_3
+#define MOTOR_DRIVER_2_ENABLE_PORT			GPIOA
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
