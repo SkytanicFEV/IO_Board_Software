@@ -65,6 +65,10 @@ void SystemClock_Config(void);
   * @brief  The application entry point.
   * @retval int
   */
+//char test[4] = {17,12,2,'G'};
+char test[5] = "Hello";
+
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -82,7 +86,7 @@ int main(void)
   /* USER CODE END Init */
 
   /* Configure the system clock */
-  SystemClock_Config();
+  SystemClock_Config(); //14MHz
 
   /* USER CODE BEGIN SysInit */
 
@@ -90,21 +94,75 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_I2C1_Init();
+  //MX_I2C1_Init();
   MX_SPI1_Init();
+//  SPI1->CR1 |= SPI_CR1_SPE;
+  /* Enable SPI peripheral */
+  //__HAL_SPI_ENABLE(hspi);
+  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET);//Write CS(SS) high
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
  
+  LCD_Reboot();
+	//int k = 0;
+//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+//	//SPI_Transfer(84); //Write Enable?
+//	for(int j =0; j<6; j++){
+//		HAL_SPI_Transmit(&hspi1, (test+(sizeof(test)/6*j)), 1, 50000);
+//		while(k < 350000){ //Wait a bit
+//			k++;
+//		}
+//	}
+//	//HAL_SPI_Transmit(&hspi1, test, 4, 50000);
+//
+//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+//	while(k < 350000){ //Wait a bit
+//		k++;
+//	}
  
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  LCD_Clear();
+  LCD_Full_Send("SKYTANIC: FEV-60");
+	int k = 0;
+	while(k < 3500000)
+	{ //Wait a bit
+		k++;
+	}
+
+  LCD_Command(0x05); //Show Cursor
+  LCD_Command(17);
+  LCD_Command(0);
+  LCD_Command(1);
+
   while (1)
   {
-    /* USER CODE END WHILE */
+//	  	/* Works */
+//		int k = 0;
+//		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+//		for(int j =0; j<5; j++){
+//			HAL_SPI_Transmit(&hspi1, test, 5, 50000);
+//			while(k < 350000){ //Wait a bit
+//				k++;
+//			}
+//		}
+//
+//		//HAL_SPI_Transmit(&hspi1, 'A', 1, 50000);
+//
+//		//HAL_SPI_Transmit(&hspi1, test, 4, 50000);
+//		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+//	  	LCD_Full_Send("Henlo");
+	  	int k = 0;
+		while(k < 350000)
+		{ //Wait a bit
+			k++;
+		}
+		/* Works */
 
+    /* USER CODE END WHILE */
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
