@@ -94,13 +94,12 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  //MX_I2C1_Init();
+  MX_I2C1_Init();
   MX_SPI1_Init();
-//  SPI1->CR1 |= SPI_CR1_SPE;
-  /* Enable SPI peripheral */
-  //__HAL_SPI_ENABLE(hspi);
-  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET);//Write CS(SS) high
   MX_USART1_UART_Init();
+
+  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET);//Write CS(SS) high
+
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -154,7 +153,7 @@ int main(void)
 //
 //		//HAL_SPI_Transmit(&hspi1, test, 4, 50000);
 //		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
-//	  	LCD_Full_Send("Henlo");
+	  	LCD_Full_Send("Hello\n");
 	  	int k = 0;
 		while(k < 350000)
 		{ //Wait a bit
