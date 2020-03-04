@@ -21,6 +21,8 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
+USART_IRQ_TRACK usart_state = Motor1TX;
+uint8_t RX_DATA = 0;
 
 /* USER CODE END 0 */
 
@@ -49,6 +51,12 @@ void MX_USART1_UART_Init(void)
 	// Configure and enable USART1 interrupt channel in NVIC
 	HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(USART1_IRQn);
+
+	//setup recieve data spot?
+	if (HAL_UART_Receive_IT(huart1, &RX_DATA, 8) != HAL_OK){
+		Error_Handler();
+	}
+
 }
 
 void HAL_UART_MspInit(UART_HandleTypeDef* uartHandle)
@@ -105,6 +113,36 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+void CheckSystem(){
+	switch (usart_state){
+	case (Motor1TX):
+			uint8_t data = MOTOR1;
+			if (HAL_UART_Transmit_IT(huart1, &data, 8) != HAL_OK ){
+				Error_Handler();
+			}
+			usart_state = Motor1Recieve;
+			break;
+	case (Motor1Fail1):
+			uint8_t data = MOTOR1;
+			if (HAL_UART_Transmit_IT(huart1, &data, 8) != HAL_OK ){
+				Error_Handler();
+			}
+			break;
+	case(Motor2TX):
+			uint8_t data = MOTOR2;
+			if (HAL_UART_Transmit_IT(huart1, &data, 8) != HAL_OK ){
+				Error_Handler();
+			}
+			usart_state = Motor2Recieve;
+			break;
+	case(Motor2Fail1):
+			uint8_t data = MOTOR2;
+			if (HAL_UART_Transmit_IT(huart1, &data, 8) != HAL_OK ){
+				Error_Handler();
+			}
+			break;
+	}
+}
 
 /* USER CODE END 1 */
 

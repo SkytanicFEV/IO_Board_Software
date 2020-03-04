@@ -146,5 +146,15 @@ void EXTI2_3_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 
+void TIM1_CC_IRQHandler(void)
+{
+	HAL_TIM_IRQHandler(&htim1);
+}
+
+void USART1_IRQHandler(void)
+{
+	HAL_UART_IRQHandler(&huart1);
+}
+
 /* USER CODE END 1 */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

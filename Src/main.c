@@ -24,6 +24,7 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
+extern usart_state;
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -79,7 +80,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_UART_Receive(&huart1, rx_buffer, RX_BUFFER_SIZE, 1000);
+	  CheckSystem();
+	  //HAL_UART_Receive(&huart1, rx_buffer, RX_BUFFER_SIZE, 1000);
   }
   /* USER CODE END 3 */
 }
@@ -143,6 +145,40 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			HAL_GPIO_WritePin(MOTOR_DRIVER_2_ENABLE_PORT, MOTOR_DRIVER_2_ENABLE_PIN, GPIO_PIN_RESET);
 		}
 
+	}
+}
+
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+	//START TIMER on CH4
+	if(HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_4) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+	//Timer reset
+	switch (usart_state){
+	case (Motor1TX):
+			CheckSystem();
+			break;
+	case (Motor1Fail1):
+			usart_state = Motor2TX;
+			CheckSystem();
+			break;
+	case (Motor1Recieve):
+			usart_state = Motor1Fail1;
+			CheckSystem();
+			break;
+	case(Motor2Recieve):
+			usart_state = Motor2Fail1;
+			CheckSystem();
+			break;
+	case(Motor2Fail1):
+			usart_state = Motor1TX;
+
+			break;
 	}
 }
 
