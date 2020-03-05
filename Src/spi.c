@@ -188,13 +188,15 @@ void LCD_Battery_Transmit(uint8_t Batt_Level)
 {
 	char Batt_Str[9] = "Battery: ";
 	char Batt_Percent[1] = "%";
+	char Batt_Level_String[2];
+	IntToString(Batt_Level, Batt_Level_String, 2);
 	/* Transmit Battery String */
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 	HAL_SPI_Transmit(&hspi1, Batt_Str, strlen(Batt_Str), 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 	/* Transmit Battery Level */
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
-	HAL_SPI_Transmit(&hspi1, &Batt_Level, strlen(Batt_Level), 50000);
+	HAL_SPI_Transmit(&hspi1, Batt_Level_String, strlen(Batt_Level_String), 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 	/* Transmit Battery Percent */
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
