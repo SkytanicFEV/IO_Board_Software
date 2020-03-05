@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
+#include "spi.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -90,6 +91,12 @@ void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 2 */
 
+void GPIO_IRQHandler(void)
+{
+	if(GPIOF->IDR & !PGOOD_1_Pin){
+		LCD_24V_Error();
+	}
+}
 /* USER CODE END 2 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
