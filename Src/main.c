@@ -24,7 +24,10 @@
 #include "spi.h"
 #include "usart.h"
 #include "gpio.h"
-extern usart_state;
+#include "tim.h"
+ USART_IRQ_TRACK usart_state;
+uint8_t error_state = 0;
+uint8_t reps = 0;
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -70,17 +73,16 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   MX_USART1_UART_Init();
+  MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-
   /* USER CODE END 2 */
  
  
-
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  CheckSystem();
+
 	  //HAL_UART_Receive(&huart1, rx_buffer, RX_BUFFER_SIZE, 1000);
   }
   /* USER CODE END 3 */
@@ -151,34 +153,69 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 	//START TIMER on CH4
-	if(HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_4) != HAL_OK)
-	{
-		Error_Handler();
+//	htim1.Instance->CNT = TIM_PERIOD;
+//	if(HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4) != HAL_OK)
+//	{
+//		Error_Handler();
+//	}
+
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	switch(usart_state){
+		case (Motor1Recieve):
+				error_state &= ~0b01;
+				usart_state = Motor2TX;
+				CheckSystem();
+				break;
+		case (Motor1Fail1):
+				error_state &= ~0b01;
+				usart_state = Motor2TX;
+				CheckSystem();
+				break;
+		case (Motor2Recieve):
+				error_state &= ~0b01;
+				usart_state = Motor1TX;
+				CheckSystem();
+				break;
+		case (Motor2Fail1):
+				error_state &= ~0b01;
+				usart_state = Motor1TX;
+				CheckSystem();
+				break;
 	}
 }
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 	//Timer reset
-	switch (usart_state){
-	case (Motor1TX):
-			CheckSystem();
+	if (reps >20){
+		switch (usart_state){
+		case (Motor1TX):
+				CheckSystem();
+				break;
+		case (Motor1Recieve):
+				usart_state = Motor1Fail1;
+				CheckSystem();
+				break;
+		case (Motor1Fail1):
+				error_state |= 0b01;
+				usart_state = Motor2TX;
+				CheckSystem();
+				break;
+		case(Motor2Recieve):
+				usart_state = Motor2Fail1;
+				CheckSystem();
+				break;
+		case(Motor2Fail1):
+				error_state |= 0b10;
+				usart_state = Motor1TX;
+				break;
+		default:
 			break;
-	case (Motor1Fail1):
-			usart_state = Motor2TX;
-			CheckSystem();
-			break;
-	case (Motor1Recieve):
-			usart_state = Motor1Fail1;
-			CheckSystem();
-			break;
-	case(Motor2Recieve):
-			usart_state = Motor2Fail1;
-			CheckSystem();
-			break;
-	case(Motor2Fail1):
-			usart_state = Motor1TX;
-
-			break;
+		}
+	}
+	else{
+		reps++;
 	}
 }
 
@@ -190,7 +227,7 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+	while(69); //always true baby ;)
   /* USER CODE END Error_Handler_Debug */
 }
 

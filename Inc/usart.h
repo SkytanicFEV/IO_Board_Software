@@ -34,8 +34,11 @@ extern UART_HandleTypeDef huart1;
 
 /* USER CODE BEGIN Private defines */
 
-#define MOTOR1 0b00000000
-#define MOTOR2 0b10000000
+#define IO_ADDRESS ((uint8_t)'0')
+#define MOTOR1_ADDRESS ((uint8_t)'1')
+#define MOTOR2_ADDRESS ((uint8_t)'2')
+#define SEND_RPM ((uint8_t)'r')
+
 
 typedef enum{
 	Motor1TX,
@@ -51,6 +54,8 @@ typedef enum{
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+
+void CheckSystem(void);
 
 /* USER CODE END Prototypes */
 

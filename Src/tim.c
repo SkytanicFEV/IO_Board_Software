@@ -29,13 +29,10 @@ TIM_HandleTypeDef htim1;
 /* TIM1 init function */
 void MX_TIM1_Init(void)
 {
-	TIM_SlaveConfigTypeDef sSlaveConfig = {0};
-	TIM_MasterConfigTypeDef sMasterConfig = {0};
 	TIM_OC_InitTypeDef sConfigOC = {0};
-	TIM_BreakDeadTimeConfigTypeDef sBreakDeadTimeConfig = {0};
 
 	htim1.Instance = TIM1;
-	htim1.Init.Prescaler = 0;
+	htim1.Init.Prescaler = TIM_CLOCKPRESCALER_DIV8;
 	htim1.Init.CounterMode = TIM_COUNTERMODE_DOWN;
 	htim1.Init.Period = TIM_PERIOD;
 	htim1.Init.ClockDivision = TIM_CLOCKDIVISION_DIV4;
@@ -53,23 +50,8 @@ void MX_TIM1_Init(void)
 	{
 		Error_Handler();
 	}
-#ifndef MASTER
-	sSlaveConfig.SlaveMode = TIM_SLAVEMODE_EXTERNAL1;
-	sSlaveConfig.InputTrigger = TIM_TS_ETRF;
-	sSlaveConfig.TriggerPolarity = TIM_TRIGGERPOLARITY_FALLING;
-	sSlaveConfig.TriggerPrescaler = TIM_TRIGGERPRESCALER_DIV1;
-	sSlaveConfig.TriggerFilter = 0;
-	if (HAL_TIM_SlaveConfigSynchronization(&htim1, &sSlaveConfig) != HAL_OK)
-	{
-		Error_Handler();
-	}
-#endif
-//	sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-//	sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-//	if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
-//	{
-//		Error_Handler();
-//	}
+
+
 	sConfigOC.OCMode = TIM_OCMODE_PWM1;
 	sConfigOC.Pulse = 0;
 	sConfigOC.OCPolarity = TIM_OCPOLARITY_HIGH;
@@ -77,47 +59,24 @@ void MX_TIM1_Init(void)
 	sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
 	sConfigOC.OCIdleState = TIM_OCIDLESTATE_RESET;
 	sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
-	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
-	{
-		Error_Handler();
-	}
-	if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
+
+	if (HAL_TIM_OC_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_4) != HAL_OK)
 	{
 		Error_Handler();
 	}
 
+	HAL_TIM_MspPostInit(&htim1);
 	// Enable clock tree
 	__HAL_RCC_TIM1_CLK_ENABLE();
 
+	if(HAL_TIM_OC_Start_IT(&htim1, TIM_CHANNEL_4) != HAL_OK)
+		{
+			Error_Handler();
+	}
+	//htim1.Instance->CR1 |= TIM_OPMODE_SINGLE;
 	// Configure and enable TIM3 interrupt channel in NVIC
 	HAL_NVIC_SetPriority(TIM1_CC_IRQn, 0, 0);
 	HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
-}
-
-void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* tim_baseHandle)
-{
-
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  if(tim_baseHandle->Instance==TIM1)
-  {
-    /* TIM1 clock enable */
-    __HAL_RCC_TIM1_CLK_ENABLE();
-
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    /**TIM1 GPIO Configuration
-    PA12     ------> TIM1_ETR
-    */
-    GPIO_InitStruct.Pin = EXTERNAL_TRIGGER_PIN;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    GPIO_InitStruct.Alternate = GPIO_AF2_TIM1;
-    HAL_GPIO_Init(EXTERNAL_TRIGGER_PORT, &GPIO_InitStruct);
-  }
 }
 
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef* timHandle)
@@ -165,9 +124,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
     PA11     ------> TIM1_CH4
     PA12     ------> TIM1_ETR
     */
-    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11 | GPIO_PIN_12);
-
-    HAL_GPIO_DeInit(GPIOB, PWM_PHASE_W_LOW_PIN|PWM_PHASE_V_LOW_PIN);
+    HAL_GPIO_DeInit(GPIOA, GPIO_PIN_11);
   }
 }
 

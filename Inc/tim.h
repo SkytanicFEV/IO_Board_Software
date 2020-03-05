@@ -27,7 +27,6 @@
 #include "main.h"
 
 extern TIM_HandleTypeDef htim1;
-extern TIM_HandleTypeDef htim3;
 
 #define TIM_PERIOD					0xFFFF
 
