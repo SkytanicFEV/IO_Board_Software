@@ -104,7 +104,7 @@ int main(void)
 
   /* USER CODE END 2 */
  
-  LCD_Reboot();
+
 	//int k = 0;
 //	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 //	//SPI_Transfer(84); //Write Enable?
@@ -124,18 +124,48 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  LCD_Clear();
-  LCD_Full_Send("SKYTANIC: FEV-60");
-	int k = 0;
-	while(k < 3500000)
-	{ //Wait a bit
-		k++;
-	}
+  LCD_Reboot();
 
-  LCD_Command(0x05); //Show Cursor
-  LCD_Command(17);
-  LCD_Command(0);
-  LCD_Command(1);
+  LCD_Clear();
+
+  //Cursor not completely tested
+  LCD_Command(17);  		//Set Cursor position
+  LCD_Command(0);			//Column Number
+  LCD_Command(1);			//Row Number
+
+  LCD_Full_Send("SKYTANIC: FEV-60");	//Tested and worked. If for some reason a Hard fault occurs,
+  	  	  	  	  	  	  	  	  	  	//potentially from trying to set cursor.
+  int k = 0;
+  while(k < 3500000) //Show Project/Team Name for a bit
+  {
+	k++;
+  }
+
+   //24V Error Test
+   LCD_Clear();				//Tested and worked for me
+   LCD_24V_Error();
+
+   //MD Error Test
+   LCD_Clear();
+   LCD_Motor_Error(0b01);	//Motor 1 error passed in: 0b01 - MD1, 0b10 - MD2, 0b11 - Both
+
+   //Test Together
+   LCD_Clear();
+   LCD_24V_Error();
+   LCD_Command(17);  		//Set Cursor position
+   LCD_Command(0);			//Column Number
+   LCD_Command(2);			//Row Number for third line
+   LCD_Motor_Error(0b01);	//Motor 1 error passed in
+
+   //RPM Test
+   LCD_Clear();
+   LCD_RPM_Transmit(500);	//Untested - RPM value is input argument
+
+
+//  LCD_Command(0x05); //Show Cursor
+//  LCD_Command(17);
+//  LCD_Command(0);
+//  LCD_Command(1);
 
   while (1)
   {
@@ -155,7 +185,7 @@ int main(void)
 //		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 	  	LCD_Full_Send("Hello\n");
 	  	int k = 0;
-		while(k < 350000)
+		while(k < 3500000)
 		{ //Wait a bit
 			k++;
 		}

@@ -132,7 +132,7 @@ void LCD_Full_Send(char LCD_data[])
 
 void LCD_Motor_Error(uint8_t Motor_Error_State)
 {
-	char Error_Str[9] = "!!ERROR!!";
+	char Error_Str[10] = "!!ERROR!!\n";
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 	HAL_SPI_Transmit(&hspi1, Error_Str, strlen(Error_Str), 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
@@ -158,7 +158,7 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 
 void LCD_24V_Error(void)
 {
-	char Error_Str[9] = "!!ERROR!!";
+	char Error_Str[10] = "!!ERROR!!\n";
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 	HAL_SPI_Transmit(&hspi1, Error_Str, strlen(Error_Str), 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
