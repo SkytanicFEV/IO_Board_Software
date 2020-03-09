@@ -74,9 +74,9 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
+  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET);//Write CS(SS) high
   MX_USART1_UART_Init();
   MX_TIM1_Init();
-  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET);//Write CS(SS) high
 
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
@@ -85,34 +85,65 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
    LCD_Reboot();
-
-   //24V Error Test
-   LCD_Clear();				//Tested and worked for me
-   LCD_24V_Error();
-
-   //MD Error Test
    LCD_Clear();
-   LCD_Motor_Error(0b01);	//Motor 1 error passed in: 0b01 - MD1, 0b10 - MD2, 0b11 - Both
-
-   //Test Together
-   LCD_Clear();
-   LCD_24V_Error();
-   LCD_Motor_Error(0b01);	//Motor 1 error passed in
-
-   //RPM Test
-   LCD_Clear();
-   char test_rpm[] = "2759";
-   LCD_RPM_Transmit(test_rpm);	//Still issues, need to display number
-   LCD_Command(0x11);
-   LCD_Command(0x00);
-   LCD_Command(0x01);
-   LCD_Battery_Transmit(87);
-   LCD_Clear();
-
+   //LCD_Start_Screen();
+//
+//   //24V Error Test
+//   LCD_Clear();				//Tested and worked for me
+//   LCD_24V_Error();
+//
+//   //MD Error Test
+//   LCD_Clear();
+//   LCD_Motor_Error(0b01);	//Motor 1 error passed in: 0b01 - MD1, 0b10 - MD2, 0b11 - Both
+//
+//   //Test Together
+//   LCD_Clear();
+//   LCD_24V_Error();
+//   LCD_Motor_Error(0b01);	//Motor 1 error passed in
+//
+//   //RPM Test
+//   LCD_Clear();
+   char test_rpm[] = "0";
+//   LCD_RPM_Transmit(test_rpm);	//Still issues, need to display number
+//   LCD_Command(0x11);
+//   LCD_Command(0x00);
+//   LCD_Command(0x01);
+//   LCD_Battery_Transmit(87);
+//   LCD_Clear();
+  int startup_flag = 0;
 
   while (1)
   {
+	  int k = 0;
+	  while(k<5000000)
+	  {
+		  //LCD_Battery_Transmit(40);
+		  k++;
+	  }
 
+	  //startup_flag = 0;
+	  //This skips
+	  if(startup_flag == 0)
+	  {
+		  LCD_Clear();
+		  LCD_Start_Screen();
+		  startup_flag = 1;
+		  int j = 0;
+		  while(j<5000000)
+		  {
+			  //LCD_Battery_Transmit(40);
+			  j++;
+		  }
+	  }
+
+
+
+	  if(startup_flag == 1)
+	  {
+		  LCD_Clear();
+		  LCD_RPM_Transmit(test_rpm);
+		  startup_flag = 2;
+	  }
   }
   /* USER CODE END 3 */
 }

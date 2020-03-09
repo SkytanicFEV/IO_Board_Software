@@ -42,7 +42,7 @@ void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_HIGH;
   hspi1.Init.CLKPhase = SPI_PHASE_2EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
@@ -275,6 +275,15 @@ void LCD_Battery_Transmit(uint8_t Batt_Level)
 	/* Transmit Battery Percent */
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 	HAL_SPI_Transmit(&hspi1, Batt_Percent, strlen(Batt_Percent), 50000);
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+}
+
+void LCD_Start_Screen(void)
+{
+	char Start_Str[16] = "SKYTANIC:FEV-60";
+	/* String */
+	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+	HAL_SPI_Transmit(&hspi1, Start_Str, strlen(Start_Str), 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 }
 

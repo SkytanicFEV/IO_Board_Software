@@ -44,6 +44,7 @@ void LCD_Battery_Transmit(uint8_t Batt_Level);
 void LCD_Motor_Error(uint8_t Motor_Error_State);
 void LCD_24V_Error(void);
 void LCD_RPM_Transmit(char RPM_Val[]);
+void LCD_Start_Screen(void);
 void LCD_Command(uint8_t LCD_cmd);
 void LCD_Clear(void);
 void LCD_Reboot(void);
