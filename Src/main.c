@@ -101,12 +101,13 @@ int main(void)
 
    //RPM Test
    LCD_Clear();
-   char test_rpm[] = "1299";
+   char test_rpm[] = "2759";
    LCD_RPM_Transmit(test_rpm);	//Still issues, need to display number
    LCD_Command(0x11);
    LCD_Command(0x00);
    LCD_Command(0x01);
    LCD_Battery_Transmit(87);
+   LCD_Clear();
 
 
   while (1)
