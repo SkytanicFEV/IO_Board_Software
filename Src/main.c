@@ -25,6 +25,8 @@
 #include "usart.h"
 #include "gpio.h"
 #include "tim.h"
+#include "string.h"
+
  USART_IRQ_TRACK usart_state;
 uint8_t error_state = 0;
 uint8_t reps = 0;
@@ -64,7 +66,7 @@ int main(void)
   /* USER CODE END Init */
 
   /* Configure the system clock */
-  SystemClock_Config(); //14MHz
+  SystemClock_Config(); //40MHz
 
   /* USER CODE BEGIN SysInit */
 
@@ -74,9 +76,10 @@ int main(void)
   MX_GPIO_Init();
   MX_I2C1_Init();
   MX_SPI1_Init();
-  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET);//Write CS(SS) high
   MX_USART1_UART_Init();
   MX_TIM1_Init();
+  HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET);//Write CS(SS) high
+
 
   /* USER CODE BEGIN 2 */
   /* USER CODE END 2 */
@@ -86,6 +89,7 @@ int main(void)
 
    LCD_Reboot();
    LCD_Clear();
+   HAL_Delay(1000);
    //LCD_Start_Screen();
 //
 //   //24V Error Test
@@ -103,7 +107,13 @@ int main(void)
 //
 //   //RPM Test
 //   LCD_Clear();
-   char test_rpm[] = "0";
+   char test_rpm[] = "100";
+
+//   RX_DATA[0] = '0';
+//   RX_DATA[1] = '0';
+//   RX_DATA[2] = '0';
+
+
 //   LCD_RPM_Transmit(test_rpm);	//Still issues, need to display number
 //   LCD_Command(0x11);
 //   LCD_Command(0x00);
@@ -114,36 +124,36 @@ int main(void)
 
   while (1)
   {
-	  int k = 0;
-	  while(k<5000000)
-	  {
-		  //LCD_Battery_Transmit(40);
-		  k++;
-	  }
-
-	  //startup_flag = 0;
-	  //This skips
 	  if(startup_flag == 0)
 	  {
 		  LCD_Clear();
+//		  HAL_Delay(1);
 		  LCD_Start_Screen();
 		  startup_flag = 1;
-		  int j = 0;
-		  while(j<5000000)
-		  {
-			  //LCD_Battery_Transmit(40);
-			  j++;
-		  }
+
 	  }
 
+	  HAL_Delay(2000);
 
 
 	  if(startup_flag == 1)
 	  {
 		  LCD_Clear();
-		  LCD_RPM_Transmit(test_rpm);
+		  HAL_Delay(1);
+		  LCD_RPM_Transmit(test_rpm, strlen(test_rpm));
 		  startup_flag = 2;
 	  }
+	  else
+	  {
+		  LCD_Clear();
+		LCD_RPM_Transmit(RX_DATA,3);
+		RX_DATA[0] = '0';
+		RX_DATA[1] = '0';
+		RX_DATA[2] = '0';
+
+	  }
+
+
   }
   /* USER CODE END 3 */
 }
@@ -227,21 +237,46 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
 				error_state &= ~0b01;
 				usart_state = Motor2TX;
 				CheckSystem();
+//				LCD_Clear();
+//				HAL_Delay(10);
+				LCD_RPM_Transmit(RX_DATA,3);
+				RX_DATA[0] = '0';
+				RX_DATA[1] = '0';
+				RX_DATA[2] = '0';
+
 				break;
 		case (Motor1Fail1):
 				error_state &= ~0b01;
 				usart_state = Motor2TX;
 				CheckSystem();
+//				LCD_Clear();
+//				HAL_Delay(10);
+				LCD_RPM_Transmit(RX_DATA,3);
+				RX_DATA[0] = '0';
+				RX_DATA[1] = '0';
+				RX_DATA[2] = '0';
 				break;
 		case (Motor2Recieve):
 				error_state &= ~0b01;
 				usart_state = Motor1TX;
 				CheckSystem();
+//				LCD_Clear();
+//				HAL_Delay(10);
+				LCD_RPM_Transmit(RX_DATA,3);
+				RX_DATA[0] = '0';
+				RX_DATA[1] = '0';
+				RX_DATA[2] = '0';
 				break;
 		case (Motor2Fail1):
 				error_state &= ~0b01;
 				usart_state = Motor1TX;
 				CheckSystem();
+//				LCD_Clear();
+//				HAL_Delay(10);
+				LCD_RPM_Transmit(RX_DATA,3);
+				RX_DATA[0] = '0';
+				RX_DATA[1] = '0';
+				RX_DATA[2] = '0';
 				break;
 	}
 }
@@ -261,6 +296,9 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 				error_state |= 0b01;
 				usart_state = Motor2TX;
 				CheckSystem();
+//				LCD_Clear();
+//				HAL_Delay(10);
+//				LCD_Motor_Error(error_state);
 				break;
 		case(Motor2Recieve):
 				usart_state = Motor2Fail1;
@@ -269,6 +307,9 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 		case(Motor2Fail1):
 				error_state |= 0b10;
 				usart_state = Motor1TX;
+//				LCD_Clear();
+//				HAL_Delay(10);
+//				LCD_Motor_Error(error_state);
 				break;
 		default:
 			break;

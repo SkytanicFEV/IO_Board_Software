@@ -31,6 +31,7 @@
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
+uint8_t RX_DATA[10];
 
 /* USER CODE BEGIN Private defines */
 

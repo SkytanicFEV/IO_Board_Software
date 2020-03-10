@@ -75,7 +75,7 @@ void MX_TIM1_Init(void)
 	}
 	//htim1.Instance->CR1 |= TIM_OPMODE_SINGLE;
 	// Configure and enable TIM3 interrupt channel in NVIC
-	HAL_NVIC_SetPriority(TIM1_CC_IRQn, 0, 0);
+	HAL_NVIC_SetPriority(TIM1_CC_IRQn, 1, 0);
 	HAL_NVIC_EnableIRQ(TIM1_CC_IRQn);
 }
 

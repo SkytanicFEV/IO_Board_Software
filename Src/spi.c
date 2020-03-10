@@ -245,7 +245,7 @@ void LCD_24V_Error(void)
 	HAL_GPIO_WritePin(GPIOF, PGOOD_24V_LED_Pin, GPIO_PIN_SET);
 }
 
-void LCD_RPM_Transmit(char RPM_Val[])
+void LCD_RPM_Transmit(uint8_t * RPM_Val, int length)
 {
 	char RPM_Str[6] = "RPM: ";
 	/* String */
@@ -254,7 +254,7 @@ void LCD_RPM_Transmit(char RPM_Val[])
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 	/* RPM Value */
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
-	HAL_SPI_Transmit(&hspi1, RPM_Val, strlen(RPM_Val), 50000);
+	HAL_SPI_Transmit(&hspi1, RPM_Val, length, 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 }
 
@@ -342,14 +342,16 @@ void LCD_Reboot(void)
 	//SPI_Transfer(84); //Write Enable?
 	HAL_SPI_Transmit(&hspi1, &clr, 1, 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+	HAL_Delay(20);
   	//LCD_Clear();
   	//LCD_Clear();
 }
 
 void LCD_Clear(void)
 {
-	uint8_t clr = 12;
+	uint8_t clr = LCD_CLEAR_CHARACTER;
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+	HAL_Delay(1);
 	//SPI_Transfer(84); //Write Enable?
 	HAL_SPI_Transmit(&hspi1, &clr, 1, 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High

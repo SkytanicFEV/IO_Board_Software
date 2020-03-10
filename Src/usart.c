@@ -22,7 +22,6 @@
 
 /* USER CODE BEGIN 0 */
 USART_IRQ_TRACK usart_state = Motor1TX;
-uint8_t RX_DATA[10];
 extern uint8_t reps;
 /* USER CODE END 0 */
 
