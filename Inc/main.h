@@ -38,21 +38,21 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes */
-
+typedef enum{
+	Motor1TX,
+	Motor1Recieve,
+	Motor1Fail1,
+	Motor2TX,
+	Motor2Recieve,
+	Motor2Fail1,
+} USART_IRQ_TRACK;
 /* Exported types ------------------------------------------------------------*/
-/* USER CODE BEGIN ET */
 
-/* USER CODE END ET */
-
-/* Exported constants --------------------------------------------------------*/
-/* USER CODE BEGIN EC */
-
-/* USER CODE END EC */
-
-/* Exported macro ------------------------------------------------------------*/
-/* USER CODE BEGIN EM */
-
-/* USER CODE END EM */
+typedef enum
+{
+	Fault_NotDisplayed = 0,
+	Fault_Displayed,
+}faultDisplay_t;
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
@@ -93,7 +93,13 @@ void Error_Handler(void);
 
 #define RX_BUFFER_SIZE						(10U)
 
-uint8_t rx_buffer[RX_BUFFER_SIZE];
+uint8_t error_state;
+USART_IRQ_TRACK usart_state;
+
+int startup_flag;
+
+
+//uint8_t rx_buffer[RX_BUFFER_SIZE];
 
 #ifdef __cplusplus
 }

@@ -137,6 +137,11 @@ void EXTI2_3_IRQHandler(void)
 	HAL_GPIO_EXTI_IRQHandler(SWITCH_1_Pin);
 }
 
+void EXTI4_15_IRQHandler(void)
+{
+	HAL_GPIO_EXTI_IRQHandler(SWITCH_1_Pin);
+}
+
 /******************************************************************************/
 /* STM32F0xx Peripheral Interrupt Handlers                                    */
 /* Add here the Interrupt Handlers for the used peripherals.                  */
@@ -153,7 +158,42 @@ void TIM1_CC_IRQHandler(void)
 
 void USART1_IRQHandler(void)
 {
-	HAL_UART_IRQHandler(&huart1);
+	static uint8_t last_char;
+	if(huart1.Instance->ISR & USART_ISR_RXNE)
+	{
+		rx_buffer[last_char] = huart1.Instance->RDR;
+		if (last_char >= 2){
+			last_char =0;
+			switch(usart_state){
+				case (Motor1Recieve):
+						error_state &= ~0b01;
+						usart_state = Motor2TX;
+						break;
+				case (Motor1Fail1):
+						error_state &= ~0b01;
+						usart_state = Motor2TX;
+						break;
+				case (Motor2Recieve):
+						error_state &= ~0b01;
+						usart_state = Motor1TX;
+						break;
+				case (Motor2Fail1):
+						error_state &= ~0b01;
+						usart_state = Motor1TX;
+						break;
+				default:
+					break;
+			}
+		}
+		else {
+			last_char++;
+		}
+	}
+	else
+	{
+		HAL_UART_IRQHandler(&huart1);
+	}
+
 }
 
 /* USER CODE END 1 */

@@ -24,6 +24,11 @@
 uint8_t LCD_error_queue = 0;
 uint8_t LCD_queue_prev = 0;
 
+faultDisplay_t motor1_faultDisplay;
+faultDisplay_t motor2_faultDisplay;
+faultDisplay_t motor12_faultDisplay;
+faultDisplay_t p24V_faultDisplay;
+
 
 /* USER CODE BEGIN 0 */
 
@@ -138,48 +143,83 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 {
 
 	char Error_Str[10] = "!!ERROR!!\n";
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
-	HAL_SPI_Transmit(&hspi1, Error_Str, strlen(Error_Str), 50000);
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+	char Motor1_Error_Str[10] = "MD 1 Fault";
+	char Motor2_Error_Str[10] = "MD 2 Fault";
+	char Motor12_Error_Str[14] = "MD 1 & 2 Fault";
 
-	if((LCD_error_queue == 0) & (LCD_queue_prev == 1))
-	{
-		LCD_queue_prev = 0;//Reset to pos1
-	}
+//	if(LCD_error_queue == 1)
+//	{
+//		LCD_queue_prev = 1;
 
-	if(LCD_error_queue == 1)
-	{
-		LCD_queue_prev = 1;
-		LCD_Command(0x11);  		//Set Cursor position
-		LCD_Command(0x00);			//Column Number
-		LCD_Command(0x03);			//Row Number
-		LCD_error_queue = 0;
+//		LCD_error_queue = 0;
 
-		char Motor_Error_Str[18] = "Motor Driver Fault";
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
-		HAL_SPI_Transmit(&hspi1, Motor_Error_Str, strlen(Motor_Error_Str), 50000);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
-	}
+		switch(Motor_Error_State)
+		{
+		case (1):
+				if(motor1_faultDisplay == Fault_NotDisplayed)
+				{
+					LCD_Command(0x11);  		//Set Cursor position
+					LCD_Command(0x00);			//Column Number
+					LCD_Command(0x03);			//Row Number
 
+					HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+					HAL_SPI_Transmit(&hspi1, Motor1_Error_Str, strlen(Motor1_Error_Str), 50000);
+					HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+				}
+				break;
+		case (2):
+				if(motor2_faultDisplay == Fault_NotDisplayed)
+				{
+					LCD_Command(0x11);  		//Set Cursor position
+					LCD_Command(0x00);			//Column Number
+					LCD_Command(0x03);			//Row Number
 
+					HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+					HAL_SPI_Transmit(&hspi1, Motor2_Error_Str, strlen(Motor2_Error_Str), 50000);
+					HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+				}
+				break;
+		case(3):
+				if(motor12_faultDisplay == Fault_NotDisplayed)
+				{
+					LCD_Command(0x11);  		//Set Cursor position
+					LCD_Command(0x00);			//Column Number
+					LCD_Command(0x03);			//Row Number
 
-	if((LCD_error_queue == 0) & (LCD_queue_prev == 0))
-	{
-		LCD_queue_prev = 0;
-		LCD_Command(0x11);  		//Set Cursor position
-		LCD_Command(0x00);			//Column Number
-		LCD_Command(0x01);			//Row Number
-		LCD_error_queue = 1;
+					HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+					HAL_SPI_Transmit(&hspi1, Motor12_Error_Str, strlen(Motor12_Error_Str), 50000);
+					HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+				}
+				break;
+		default:
+			break;
+		}
 
-		char Motor_Error_Str[18] = "Motor Driver Fault";
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
-		HAL_SPI_Transmit(&hspi1, Motor_Error_Str, strlen(Motor_Error_Str), 50000);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
-
-		LCD_Command(0x11);  		//Set Cursor position
-		LCD_Command(0x00);			//Column Number
-		LCD_Command(0x02);			//Row Number for third line
-	}
+//	}
+//
+//
+//
+//	if((LCD_error_queue == 0) & (LCD_queue_prev == 0))
+//	{
+//		LCD_queue_prev = 0;
+//		LCD_Command(0x11);  		//Set Cursor position
+//		LCD_Command(0x00);			//Column Number
+//		LCD_Command(0x03);			//Row Number
+//		LCD_error_queue = 1;
+//
+////		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+////		HAL_SPI_Transmit(&hspi1, Error_Str, strlen(Error_Str), 50000);
+////		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+//
+//		char Motor_Error_Str[18] = "Motor Driver Fault";
+//		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+//		HAL_SPI_Transmit(&hspi1, Motor_Error_Str, strlen(Motor_Error_Str), 50000);
+//		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+//
+//		LCD_Command(0x11);  		//Set Cursor position
+//		LCD_Command(0x00);			//Column Number
+//		LCD_Command(0x02);			//Row Number for third line
+//	}
 
 	/* Write error stuff here */
 	if(Motor_Error_State == 0b01)
@@ -199,46 +239,50 @@ void LCD_24V_Error(void)
 {
 
 	char Error_Str[10] = "!!ERROR!!\n";
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
-	HAL_SPI_Transmit(&hspi1, Error_Str, strlen(Error_Str), 50000);
-	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+//	HAL_SPI_Transmit(&hspi1, Error_Str, strlen(Error_Str), 50000);
+//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 
 	if((LCD_error_queue == 0) & (LCD_queue_prev == 1))
 	{
 		LCD_queue_prev = 0;
 	}
 
-	if(LCD_error_queue == 1)
+//	if(LCD_error_queue == 1)
+//	{
+	if(p24V_faultDisplay == Fault_NotDisplayed)
 	{
-		LCD_queue_prev = 1;
+//		LCD_queue_prev = 1;
 		LCD_Command(0x11);  		//Set Cursor position
 		LCD_Command(0x00);			//Column Number
-		LCD_Command(0x03);			//Row Number
-		LCD_error_queue = 0;
+		LCD_Command(0x02);			//Row Number
+//		LCD_error_queue = 0;
 
-		char Power_Error_Str[14] = "24V Rail Fault";
+		char Power_Error_Str[9] = "24V Fault";
 		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 		HAL_SPI_Transmit(&hspi1, Power_Error_Str, strlen(Power_Error_Str), 50000);
 		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 	}
 
-	if((LCD_error_queue == 0) & (LCD_queue_prev == 0))
-	{
-		LCD_queue_prev = 0;
-		LCD_Command(0x11);  		//Set Cursor position
-		LCD_Command(0x00);			//Column Number
-		LCD_Command(0x01);			//Row Number
-		LCD_error_queue = 1;
-
-		char Power_Error_Str[14] = "24V Rail Fault";
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
-		HAL_SPI_Transmit(&hspi1, Power_Error_Str, strlen(Power_Error_Str), 50000);
-		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
-
-		LCD_Command(0x11);  		//Set Cursor position
-		LCD_Command(0x00);			//Column Number
-		LCD_Command(0x02);			//Row Number for third line
-	}
+//	}
+//
+//	if((LCD_error_queue == 0) & (LCD_queue_prev == 0))
+//	{
+//		LCD_queue_prev = 0;
+//		LCD_Command(0x11);  		//Set Cursor position
+//		LCD_Command(0x00);			//Column Number
+//		LCD_Command(0x01);			//Row Number
+//		LCD_error_queue = 1;
+//
+//		char Power_Error_Str[14] = "24V Rail Fault";
+//		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+//		HAL_SPI_Transmit(&hspi1, Power_Error_Str, strlen(Power_Error_Str), 50000);
+//		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+//
+//		LCD_Command(0x11);  		//Set Cursor position
+//		LCD_Command(0x00);			//Column Number
+//		LCD_Command(0x02);			//Row Number for third line
+//	}
 
 
 
@@ -248,6 +292,11 @@ void LCD_24V_Error(void)
 void LCD_RPM_Transmit(uint8_t * RPM_Val, int length)
 {
 	char RPM_Str[6] = "RPM: ";
+
+	LCD_Command(0x11);  		//Set Cursor position
+	LCD_Command(0x00);			//Column Number
+	LCD_Command(0x00);			//Row Number
+
 	/* String */
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 	HAL_SPI_Transmit(&hspi1, RPM_Str, strlen(RPM_Str), 50000);

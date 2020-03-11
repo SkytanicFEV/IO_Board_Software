@@ -50,9 +50,13 @@ void MX_USART1_UART_Init(void)
 //  {
 //    Error_Handler();
 //  }
-  if (HAL_UART_Receive_IT(&huart1, &RX_DATA, 10) != HAL_OK){
+  if (HAL_UART_Receive_IT(&huart1, &rx_buffer, 10) != HAL_OK){
 	Error_Handler();
   }
+
+  // Enable interrupts
+//  huart1.Instance->CR1 |= USART_CR1_RXNEIE;
+
   HAL_UART_MspInit(&huart1);
 
 	// Configure and enable USART1 interrupt channel in NVIC

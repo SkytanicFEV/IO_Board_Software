@@ -27,9 +27,8 @@
 #include "tim.h"
 #include "string.h"
 
- USART_IRQ_TRACK usart_state;
-uint8_t error_state = 0;
 uint8_t reps = 0;
+
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,7 +61,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+//  rpm_ready = 0;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -107,8 +106,9 @@ int main(void)
 //
 //   //RPM Test
 //   LCD_Clear();
-   char test_rpm[] = "100";
+   char test_rpm[] = "888";
 
+   error_state = 0;
 //   RX_DATA[0] = '0';
 //   RX_DATA[1] = '0';
 //   RX_DATA[2] = '0';
@@ -120,39 +120,31 @@ int main(void)
 //   LCD_Command(0x01);
 //   LCD_Battery_Transmit(87);
 //   LCD_Clear();
-  int startup_flag = 0;
+   startup_flag = 0;
+
+	  LCD_Clear();
+//		  HAL_Delay(1);
+	  LCD_Start_Screen();
+	  startup_flag = 1;
+
+	  HAL_Delay(2000);
+	  LCD_Clear();
+	  HAL_Delay(1);
+	  LCD_RPM_Transmit(test_rpm, strlen(test_rpm));
+	  startup_flag = 2;
+
+	  // Check PGOOD signals
+	if((!(GPIOA->IDR & PGOOD_1_Pin)) || (!(GPIOA->IDR & PGOOD_2_Pin)))
+	{
+		LCD_24V_Error();
+	}
+
 
   while (1)
   {
-	  if(startup_flag == 0)
-	  {
-		  LCD_Clear();
-//		  HAL_Delay(1);
-		  LCD_Start_Screen();
-		  startup_flag = 1;
+		LCD_RPM_Transmit(rx_buffer,3);
 
-	  }
-
-	  HAL_Delay(2000);
-
-
-	  if(startup_flag == 1)
-	  {
-		  LCD_Clear();
-		  HAL_Delay(1);
-		  LCD_RPM_Transmit(test_rpm, strlen(test_rpm));
-		  startup_flag = 2;
-	  }
-	  else
-	  {
-		  LCD_Clear();
-		LCD_RPM_Transmit(RX_DATA,3);
-		RX_DATA[0] = '0';
-		RX_DATA[1] = '0';
-		RX_DATA[2] = '0';
-
-	  }
-
+	  HAL_Delay(500);
 
   }
   /* USER CODE END 3 */
@@ -218,6 +210,20 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		}
 
 	}
+	if(GPIO_Pin == PGOOD_1_Pin)
+	{
+		if(!(GPIOA->IDR & PGOOD_1_Pin))
+		{
+			LCD_24V_Error();
+		}
+	}
+	if(GPIO_Pin == PGOOD_2_Pin)
+	{
+		if(!(GPIOA->IDR & PGOOD_2_Pin))
+		{
+			LCD_24V_Error();
+		}
+	}
 }
 
 
@@ -231,55 +237,55 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 
 }
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-	switch(usart_state){
-		case (Motor1Recieve):
-				error_state &= ~0b01;
-				usart_state = Motor2TX;
-				CheckSystem();
-//				LCD_Clear();
-//				HAL_Delay(10);
-				LCD_RPM_Transmit(RX_DATA,3);
-				RX_DATA[0] = '0';
-				RX_DATA[1] = '0';
-				RX_DATA[2] = '0';
-
-				break;
-		case (Motor1Fail1):
-				error_state &= ~0b01;
-				usart_state = Motor2TX;
-				CheckSystem();
-//				LCD_Clear();
-//				HAL_Delay(10);
-				LCD_RPM_Transmit(RX_DATA,3);
-				RX_DATA[0] = '0';
-				RX_DATA[1] = '0';
-				RX_DATA[2] = '0';
-				break;
-		case (Motor2Recieve):
-				error_state &= ~0b01;
-				usart_state = Motor1TX;
-				CheckSystem();
-//				LCD_Clear();
-//				HAL_Delay(10);
-				LCD_RPM_Transmit(RX_DATA,3);
-				RX_DATA[0] = '0';
-				RX_DATA[1] = '0';
-				RX_DATA[2] = '0';
-				break;
-		case (Motor2Fail1):
-				error_state &= ~0b01;
-				usart_state = Motor1TX;
-				CheckSystem();
-//				LCD_Clear();
-//				HAL_Delay(10);
-				LCD_RPM_Transmit(RX_DATA,3);
-				RX_DATA[0] = '0';
-				RX_DATA[1] = '0';
-				RX_DATA[2] = '0';
-				break;
-	}
-}
+//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+//	switch(usart_state){
+//		case (Motor1Recieve):
+//				error_state &= ~0b01;
+//				usart_state = Motor2TX;
+//				CheckSystem();
+////				LCD_Clear();
+////				HAL_Delay(10);
+////				LCD_RPM_Transmit(RX_DATA,3);
+////				RX_DATA[0] = '0';
+////				RX_DATA[1] = '0';
+////				RX_DATA[2] = '0';
+//
+//				break;
+//		case (Motor1Fail1):
+//				error_state &= ~0b01;
+//				usart_state = Motor2TX;
+//				CheckSystem();
+////				LCD_Clear();
+////				HAL_Delay(10);
+////				LCD_RPM_Transmit(RX_DATA,3);
+////				RX_DATA[0] = '0';
+////				RX_DATA[1] = '0';
+////				RX_DATA[2] = '0';
+//				break;
+//		case (Motor2Recieve):
+//				error_state &= ~0b01;
+//				usart_state = Motor1TX;
+//				CheckSystem();
+////				LCD_Clear();
+////				HAL_Delay(10);
+////				LCD_RPM_Transmit(RX_DATA,3);
+////				RX_DATA[0] = '0';
+////				RX_DATA[1] = '0';
+////				RX_DATA[2] = '0';
+//				break;
+//		case (Motor2Fail1):
+//				error_state &= ~0b01;
+//				usart_state = Motor1TX;
+//				CheckSystem();
+////				LCD_Clear();
+////				HAL_Delay(10);
+////				LCD_RPM_Transmit(RX_DATA,3);
+////				RX_DATA[0] = '0';
+////				RX_DATA[1] = '0';
+////				RX_DATA[2] = '0';
+//				break;
+//	}
+//}
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 	//Timer reset
@@ -298,7 +304,13 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 				CheckSystem();
 //				LCD_Clear();
 //				HAL_Delay(10);
-//				LCD_Motor_Error(error_state);
+				if(startup_flag == 2)
+				{
+					LCD_Motor_Error(error_state);
+				}
+				break;
+		case (Motor2TX):
+				CheckSystem();
 				break;
 		case(Motor2Recieve):
 				usart_state = Motor2Fail1;
@@ -309,8 +321,10 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 				usart_state = Motor1TX;
 //				LCD_Clear();
 //				HAL_Delay(10);
-//				LCD_Motor_Error(error_state);
-				break;
+				if(startup_flag == 2)
+				{
+					LCD_Motor_Error(error_state);
+				}				break;
 		default:
 			break;
 		}

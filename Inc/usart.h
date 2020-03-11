@@ -32,6 +32,8 @@
 
 extern UART_HandleTypeDef huart1;
 uint8_t RX_DATA[10];
+volatile uint8_t rx_buffer[10];
+//volatile uint8_t rpm_ready;
 
 /* USER CODE BEGIN Private defines */
 
@@ -41,14 +43,7 @@ uint8_t RX_DATA[10];
 #define SEND_RPM ((uint8_t)'r')
 
 
-typedef enum{
-	Motor1TX,
-	Motor1Recieve,
-	Motor1Fail1,
-	Motor2TX,
-	Motor2Recieve,
-	Motor2Fail1,
-} USART_IRQ_TRACK;
+
 
 /* USER CODE END Private defines */
 
