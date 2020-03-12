@@ -65,7 +65,7 @@ void MX_TIM1_Init(void)
 		Error_Handler();
 	}
 
-	HAL_TIM_MspPostInit(&htim1);
+//	HAL_TIM_MspPostInit(&htim1);
 	// Enable clock tree
 	__HAL_RCC_TIM1_CLK_ENABLE();
 

@@ -166,18 +166,22 @@ void USART1_IRQHandler(void)
 			last_char =0;
 			switch(usart_state){
 				case (Motor1Recieve):
+						HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_RESET);
 						error_state &= ~0b01;
 						usart_state = Motor2TX;
 						break;
 				case (Motor1Fail1):
+						HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_RESET);
 						error_state &= ~0b01;
 						usart_state = Motor2TX;
 						break;
 				case (Motor2Recieve):
+						HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_RESET);
 						error_state &= ~0b01;
 						usart_state = Motor1TX;
 						break;
 				case (Motor2Fail1):
+						HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_RESET);
 						error_state &= ~0b01;
 						usart_state = Motor1TX;
 						break;

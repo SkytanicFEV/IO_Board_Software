@@ -143,8 +143,8 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 {
 
 	char Error_Str[10] = "!!ERROR!!\n";
-	char Motor1_Error_Str[10] = "MD 1 Fault";
-	char Motor2_Error_Str[10] = "MD 2 Fault";
+	char Motor1_Error_Str[14] = "MD 1 Fault    ";
+	char Motor2_Error_Str[14] = "MD 2 Fault    ";
 	char Motor12_Error_Str[14] = "MD 1 & 2 Fault";
 
 //	if(LCD_error_queue == 1)
@@ -221,12 +221,15 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 //		LCD_Command(0x02);			//Row Number for third line
 //	}
 
-	/* Write error stuff here */
+	// Set the appropriate LEDs
 	if(Motor_Error_State == 0b01)
 	{
 		HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_SET);
+		HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_RESET);
+
 	} else if(Motor_Error_State == 0b10)
 	{
+		HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_RESET);
 		HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_SET);
 	} else if(Motor_Error_State == 0b11)
 	{
@@ -285,7 +288,7 @@ void LCD_24V_Error(void)
 //	}
 
 
-
+	// Set the LED
 	HAL_GPIO_WritePin(GPIOF, PGOOD_24V_LED_Pin, GPIO_PIN_SET);
 }
 
