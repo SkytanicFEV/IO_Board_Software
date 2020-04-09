@@ -31,14 +31,27 @@
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart1;
+uint8_t RX_DATA[10];
+volatile uint8_t rx_buffer[10];
+//volatile uint8_t rpm_ready;
 
 /* USER CODE BEGIN Private defines */
+
+#define IO_ADDRESS ((uint8_t)'0')
+#define MOTOR1_ADDRESS ((uint8_t)'1')
+#define MOTOR2_ADDRESS ((uint8_t)'2')
+#define SEND_RPM ((uint8_t)'r')
+
+
+
 
 /* USER CODE END Private defines */
 
 void MX_USART1_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
+
+void CheckSystem(void);
 
 /* USER CODE END Prototypes */
 

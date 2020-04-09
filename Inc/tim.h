@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : SPI.h
+  * File Name          : TIM.h
   * Description        : This file provides code for the configuration
-  *                      of the SPI instances.
+  *                      of the TIM instances.
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __spi_H
-#define __spi_H
+#ifndef __tim_H
+#define __tim_H
 #ifdef __cplusplus
  extern "C" {
 #endif
@@ -26,34 +26,19 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
-/* USER CODE BEGIN Includes */
+extern TIM_HandleTypeDef htim1;
 
-/* USER CODE END Includes */
+#define TIM_PERIOD					0xFFFF
 
-extern SPI_HandleTypeDef hspi1;
+void MX_TIM1_Init(void);
+void MX_TIM3_Init(void);
 
-#define LCD_CLEAR_CHARACTER						(0x0C)
-
-void MX_SPI1_Init(void);
-
-/* USER CODE BEGIN Prototypes */
-void LCD_Full_Send(char LCD_data[]);
-void LCD_Battery_Transmit(uint8_t Batt_Level);
-void LCD_Motor_Error(uint8_t Motor_Error_State);
-void LCD_24V_Error(void);
-void LCD_RPM_Transmit(uint8_t * RPM_Val, int length);
-void LCD_Start_Screen(void);
-void LCD_Command(uint8_t LCD_cmd);
-void LCD_Clear(void);
-void LCD_Reboot(void);
-
-
-/* USER CODE END Prototypes */
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ spi_H */
+#endif /*__ tim_H */
 
 /**
   * @}

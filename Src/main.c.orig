@@ -25,10 +25,9 @@
 #include "usart.h"
 #include "gpio.h"
 #include "tim.h"
-#include "string.h"
-
+ USART_IRQ_TRACK usart_state;
+uint8_t error_state = 0;
 uint8_t reps = 0;
-
 
 
 /* Private function prototypes -----------------------------------------------*/
@@ -46,68 +45,141 @@ void SystemClock_Config(void);
   * @brief  The application entry point.
   * @retval int
   */
+//char test[4] = {17,12,2,'G'};
+char test[5] = "Hello";
 
 
 int main(void)
 {
+  /* USER CODE BEGIN 1 */
+
+  /* USER CODE END 1 */
+  
+
   /* MCU Configuration--------------------------------------------------------*/
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
+  /* USER CODE BEGIN Init */
+
+  /* USER CODE END Init */
+
   /* Configure the system clock */
-  SystemClock_Config(); //40MHz
+  SystemClock_Config(); //14MHz
+
+  /* USER CODE BEGIN SysInit */
+
+  /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-//  MX_I2C1_Init();
+  MX_I2C1_Init();
   MX_SPI1_Init();
   MX_USART1_UART_Init();
+<<<<<<< HEAD
   MX_TIM1_Init();
+=======
+
   HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET);//Write CS(SS) high
 
-  // Turn on fault LEDs
-	HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin | MOTOR_2_LED_Pin, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOF, PGOOD_24V_LED_Pin, GPIO_PIN_SET);
+>>>>>>> LCD
+  /* USER CODE BEGIN 2 */
+  /* USER CODE END 2 */
+ 
 
-//   LCD_Reboot();
-//   LCD_Clear();
-   HAL_Delay(1000);
+	//int k = 0;
+//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+//	//SPI_Transfer(84); //Write Enable?
+//	for(int j =0; j<6; j++){
+//		HAL_SPI_Transmit(&hspi1, (test+(sizeof(test)/6*j)), 1, 50000);
+//		while(k < 350000){ //Wait a bit
+//			k++;
+//		}
+//	}
+//	//HAL_SPI_Transmit(&hspi1, test, 4, 50000);
+//
+//	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+//	while(k < 350000){ //Wait a bit
+//		k++;
+//	}
+ 
+  /* Infinite loop */
+  /* USER CODE BEGIN WHILE */
+  LCD_Reboot();
 
-   char test_rpm[] = "888";
+  LCD_Clear();
 
-   error_state = 0;
+  //Cursor not completely tested
+  LCD_Command(17);  		//Set Cursor position
+  LCD_Command(0);			//Column Number
+  LCD_Command(1);			//Row Number
 
-   startup_flag = 0;
+  LCD_Full_Send("SKYTANIC: FEV-60");	//Tested and worked. If for some reason a Hard fault occurs,
+  	  	  	  	  	  	  	  	  	  	//potentially from trying to set cursor.
+  int k = 0;
+  while(k < 3500000) //Show Project/Team Name for a bit
+  {
+	k++;
+  }
 
-	  LCD_Clear();
-	  LCD_Start_Screen();
-	  startup_flag = 1;
+   //24V Error Test
+   LCD_Clear();				//Tested and worked for me
+   LCD_24V_Error();
 
-	  HAL_Delay(2000);
-	  LCD_Clear();
-	  LCD_RPM_Transmit(test_rpm, strlen(test_rpm));
-	  startup_flag = 2;
+   //MD Error Test
+   LCD_Clear();
+   LCD_Motor_Error(0b01);	//Motor 1 error passed in: 0b01 - MD1, 0b10 - MD2, 0b11 - Both
 
-	  HAL_Delay(1000);
+   //Test Together
+   LCD_Clear();
+   LCD_24V_Error();
+   LCD_Command(17);  		//Set Cursor position
+   LCD_Command(0);			//Column Number
+   LCD_Command(2);			//Row Number for third line
+   LCD_Motor_Error(0b01);	//Motor 1 error passed in
 
-	  // Check PGOOD signals
-	if((!(GPIOA->IDR & PGOOD_1_Pin)) || (!(GPIOA->IDR & PGOOD_2_Pin)))
-	{
-		LCD_24V_Error();
-	}
+   //RPM Test
+   LCD_Clear();
+   LCD_RPM_Transmit(500);	//Untested - RPM value is input argument
 
+
+//  LCD_Command(0x05); //Show Cursor
+//  LCD_Command(17);
+//  LCD_Command(0);
+//  LCD_Command(1);
 
   while (1)
   {
-		LCD_RPM_Transmit(rx_buffer,3);
+<<<<<<< HEAD
 
-	  HAL_Delay(250);
-//		if(startup_flag == 2)
-//		{
-			LCD_Motor_Error(error_state);
+	  //HAL_UART_Receive(&huart1, rx_buffer, RX_BUFFER_SIZE, 1000);
+=======
+//	  	/* Works */
+//		int k = 0;
+//		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+//		for(int j =0; j<5; j++){
+//			HAL_SPI_Transmit(&hspi1, test, 5, 50000);
+//			while(k < 350000){ //Wait a bit
+//				k++;
+//			}
 //		}
-		HAL_Delay(250);
+//
+//		//HAL_SPI_Transmit(&hspi1, 'A', 1, 50000);
+//
+//		//HAL_SPI_Transmit(&hspi1, test, 4, 50000);
+//		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+	  	LCD_Full_Send("Hello\n");
+	  	int k = 0;
+		while(k < 3500000)
+		{ //Wait a bit
+			k++;
+		}
+		/* Works */
+
+    /* USER CODE END WHILE */
+    /* USER CODE BEGIN 3 */
+>>>>>>> LCD
   }
   /* USER CODE END 3 */
 }
@@ -172,32 +244,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		}
 
 	}
-	if(GPIO_Pin == PGOOD_1_Pin)
-	{
-		if(!(GPIOA->IDR & PGOOD_1_Pin))
-		{
-			LCD_24V_Error();
-		}
-		// If pin comes back high then turn off the LED
-		else if(GPIOA->IDR & PGOOD_2_Pin)
-		{
-			HAL_GPIO_WritePin(GPIOF, PGOOD_24V_LED_Pin, GPIO_PIN_RESET);
-
-		}
-	}
-	if(GPIO_Pin == PGOOD_2_Pin)
-	{
-		if(!(GPIOA->IDR & PGOOD_2_Pin))
-		{
-			LCD_24V_Error();
-		}
-		// If pin comes back high then turn off the LED
-		else if(GPIOA->IDR & PGOOD_1_Pin)
-		{
-			HAL_GPIO_WritePin(GPIOF, PGOOD_24V_LED_Pin, GPIO_PIN_RESET);
-
-		}
-	}
 }
 
 
@@ -211,55 +257,30 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 
 }
 
-//void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
-//	switch(usart_state){
-//		case (Motor1Recieve):
-//				error_state &= ~0b01;
-//				usart_state = Motor2TX;
-//				CheckSystem();
-////				LCD_Clear();
-////				HAL_Delay(10);
-////				LCD_RPM_Transmit(RX_DATA,3);
-////				RX_DATA[0] = '0';
-////				RX_DATA[1] = '0';
-////				RX_DATA[2] = '0';
-//
-//				break;
-//		case (Motor1Fail1):
-//				error_state &= ~0b01;
-//				usart_state = Motor2TX;
-//				CheckSystem();
-////				LCD_Clear();
-////				HAL_Delay(10);
-////				LCD_RPM_Transmit(RX_DATA,3);
-////				RX_DATA[0] = '0';
-////				RX_DATA[1] = '0';
-////				RX_DATA[2] = '0';
-//				break;
-//		case (Motor2Recieve):
-//				error_state &= ~0b01;
-//				usart_state = Motor1TX;
-//				CheckSystem();
-////				LCD_Clear();
-////				HAL_Delay(10);
-////				LCD_RPM_Transmit(RX_DATA,3);
-////				RX_DATA[0] = '0';
-////				RX_DATA[1] = '0';
-////				RX_DATA[2] = '0';
-//				break;
-//		case (Motor2Fail1):
-//				error_state &= ~0b01;
-//				usart_state = Motor1TX;
-//				CheckSystem();
-////				LCD_Clear();
-////				HAL_Delay(10);
-////				LCD_RPM_Transmit(RX_DATA,3);
-////				RX_DATA[0] = '0';
-////				RX_DATA[1] = '0';
-////				RX_DATA[2] = '0';
-//				break;
-//	}
-//}
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart){
+	switch(usart_state){
+		case (Motor1Recieve):
+				error_state &= ~0b01;
+				usart_state = Motor2TX;
+				CheckSystem();
+				break;
+		case (Motor1Fail1):
+				error_state &= ~0b01;
+				usart_state = Motor2TX;
+				CheckSystem();
+				break;
+		case (Motor2Recieve):
+				error_state &= ~0b01;
+				usart_state = Motor1TX;
+				CheckSystem();
+				break;
+		case (Motor2Fail1):
+				error_state &= ~0b01;
+				usart_state = Motor1TX;
+				CheckSystem();
+				break;
+	}
+}
 
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 	//Timer reset
@@ -275,10 +296,6 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 		case (Motor1Fail1):
 				error_state |= 0b01;
 				usart_state = Motor2TX;
-				CheckSystem();
-
-				break;
-		case (Motor2TX):
 				CheckSystem();
 				break;
 		case(Motor2Recieve):

@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "gpio.h"
+#include "spi.h"
 /* USER CODE BEGIN 0 */
 
 /* USER CODE END 0 */
@@ -79,17 +80,25 @@ void MX_GPIO_Init(void)
 	/*Configure GPIO pins : PFPin PFPin */
 	GPIO_InitStruct.Pin = PGOOD_1_Pin|PGOOD_2_Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Pull = GPIO_PULLDOWN;
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
 	// Enable interrupts in the NVIC
 	HAL_NVIC_SetPriority(EXTI2_3_IRQn, 5, 0);
 	HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
+	HAL_NVIC_SetPriority(EXTI4_15_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
 }
 
 /* USER CODE BEGIN 2 */
 
+void GPIO_IRQHandler(void)
+{
+	if(GPIOF->IDR & !PGOOD_1_Pin){
+		LCD_24V_Error();
+	}
+}
 /* USER CODE END 2 */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
