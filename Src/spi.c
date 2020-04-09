@@ -143,9 +143,10 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 {
 
 	char Error_Str[10] = "!!ERROR!!\n";
-	char Motor1_Error_Str[14] = "MD 1 Fault    ";
-	char Motor2_Error_Str[14] = "MD 2 Fault    ";
+	char Motor1_Error_Str[14] =  "MD 1 Fault    ";
+	char Motor2_Error_Str[14] =  "MD 2 Fault    ";
 	char Motor12_Error_Str[14] = "MD 1 & 2 Fault";
+	char No_Error_Str[14] =      "              ";
 
 //	if(LCD_error_queue == 1)
 //	{
@@ -155,7 +156,19 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 
 		switch(Motor_Error_State)
 		{
+		case(0):
+
+				LCD_Command(0x11);  		//Set Cursor position
+				LCD_Command(0x00);			//Column Number
+				LCD_Command(0x03);			//Row Number
+
+				HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+				HAL_SPI_Transmit(&hspi1, No_Error_Str, strlen(No_Error_Str), 50000);
+				HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+				break;
 		case (1):
+				HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_SET);
+
 				if(motor1_faultDisplay == Fault_NotDisplayed)
 				{
 					LCD_Command(0x11);  		//Set Cursor position
@@ -168,6 +181,8 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 				}
 				break;
 		case (2):
+				HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_SET);
+
 				if(motor2_faultDisplay == Fault_NotDisplayed)
 				{
 					LCD_Command(0x11);  		//Set Cursor position
@@ -180,6 +195,9 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 				}
 				break;
 		case(3):
+				HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_SET);
+				HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_SET);
+
 				if(motor12_faultDisplay == Fault_NotDisplayed)
 				{
 					LCD_Command(0x11);  		//Set Cursor position
@@ -192,6 +210,7 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 				}
 				break;
 		default:
+
 			break;
 		}
 

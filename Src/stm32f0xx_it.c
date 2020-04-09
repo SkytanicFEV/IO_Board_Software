@@ -177,19 +177,20 @@ void USART1_IRQHandler(void)
 						break;
 				case (Motor2Recieve):
 						HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_RESET);
-						error_state &= ~0b01;
+						error_state &= ~0b10;
 						usart_state = Motor1TX;
 						break;
 				case (Motor2Fail1):
 						HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_RESET);
-						error_state &= ~0b01;
+						error_state &= ~0b10;
 						usart_state = Motor1TX;
 						break;
 				default:
 					break;
 			}
 		}
-		else {
+		else
+		{
 			last_char++;
 		}
 	}

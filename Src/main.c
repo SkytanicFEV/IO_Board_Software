@@ -100,10 +100,14 @@ int main(void)
 
   while (1)
   {
-//		LCD_RPM_Transmit(rx_buffer,3);
+		LCD_RPM_Transmit(rx_buffer,3);
 
-	  HAL_Delay(500);
-
+	  HAL_Delay(250);
+//		if(startup_flag == 2)
+//		{
+			LCD_Motor_Error(error_state);
+//		}
+		HAL_Delay(250);
   }
   /* USER CODE END 3 */
 }
@@ -272,10 +276,7 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 				error_state |= 0b01;
 				usart_state = Motor2TX;
 				CheckSystem();
-				if(startup_flag == 2)
-				{
-					LCD_Motor_Error(error_state);
-				}
+
 				break;
 		case (Motor2TX):
 				CheckSystem();
@@ -287,10 +288,6 @@ void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 		case(Motor2Fail1):
 				error_state |= 0b10;
 				usart_state = Motor1TX;
-				if(startup_flag == 2)
-				{
-					LCD_Motor_Error(error_state);
-				}
 				break;
 		default:
 			break;
