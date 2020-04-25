@@ -84,10 +84,12 @@ void MX_GPIO_Init(void)
 	HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
 	// Enable interrupts in the NVIC
+	HAL_NVIC_SetPriority(EXTI0_1_IRQn, 5, 0);
+	HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
 	HAL_NVIC_SetPriority(EXTI2_3_IRQn, 5, 0);
 	HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
-	HAL_NVIC_SetPriority(EXTI4_15_IRQn, 5, 0);
-	HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
+//	HAL_NVIC_SetPriority(EXTI4_15_IRQn, 5, 0);
+//	HAL_NVIC_EnableIRQ(EXTI4_15_IRQn);
 
 }
 

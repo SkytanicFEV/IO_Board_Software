@@ -40,6 +40,7 @@ void MX_SPI1_Init(void);
 void LCD_Full_Send(char LCD_data[]);
 void LCD_Battery_Transmit(uint8_t Batt_Level);
 void LCD_Motor_Error(uint8_t Motor_Error_State);
+void LCD_Motor_EN(uint8_t en);
 void LCD_24V_Error(void);
 void LCD_RPM_Transmit(uint8_t * RPM_Val, int length);
 void LCD_Start_Screen(void);

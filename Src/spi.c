@@ -130,6 +130,7 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
   }
 } 
 
+
 /* USER CODE BEGIN 1 */
 void LCD_Full_Send(char LCD_data[])
 {
@@ -141,12 +142,11 @@ void LCD_Full_Send(char LCD_data[])
 
 void LCD_Motor_Error(uint8_t Motor_Error_State)
 {
-
 	char Error_Str[10] = "!!ERROR!!\n";
-	char Motor1_Error_Str[14] =  "MD 1 Fault    ";
-	char Motor2_Error_Str[14] =  "MD 2 Fault    ";
-	char Motor12_Error_Str[14] = "MD 1 & 2 Fault";
-	char No_Error_Str[14] =      "              ";
+	char Motor1_Error_Str[15] =  "MD 1 Fault    ";
+	char Motor2_Error_Str[15] =  "MD 2 Fault    ";
+	char Motor12_Error_Str[15] = "MD 1 & 2 Fault";
+	char No_Error_Str[15] =      "              ";
 
 //	if(LCD_error_queue == 1)
 //	{
@@ -157,7 +157,7 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 		switch(Motor_Error_State)
 		{
 		case(0):
-
+				//no errors present
 				LCD_Command(0x11);  		//Set Cursor position
 				LCD_Command(0x00);			//Column Number
 				LCD_Command(0x03);			//Row Number
@@ -167,6 +167,7 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 				HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
 				break;
 		case (1):
+				//Motor driver 1 has an error
 				HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_SET);
 
 				if(motor1_faultDisplay == Fault_NotDisplayed)
@@ -181,6 +182,7 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 				}
 				break;
 		case (2):
+				//Motor driver 2 has an error
 				HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_SET);
 
 				if(motor2_faultDisplay == Fault_NotDisplayed)
@@ -195,6 +197,7 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 				}
 				break;
 		case(3):
+				//Motor driver 1 and 2 has an error
 				HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_SET);
 				HAL_GPIO_WritePin(GPIOC, MOTOR_2_LED_Pin, GPIO_PIN_SET);
 
@@ -240,7 +243,7 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 //		LCD_Command(0x02);			//Row Number for third line
 //	}
 
-	// Set the appropriate LEDs
+	// Set the appropriate LEDs based off the errors
 	if(Motor_Error_State == 0b01)
 	{
 		HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin, GPIO_PIN_SET);
@@ -255,6 +258,30 @@ void LCD_Motor_Error(uint8_t Motor_Error_State)
 		HAL_GPIO_WritePin(GPIOC, MOTOR_1_LED_Pin|MOTOR_2_LED_Pin, GPIO_PIN_SET);
 	}
 
+}
+
+void LCD_Motor_EN(uint8_t en)
+{
+	char En_Str[10] = "Motor ON ";
+	char Dis_Str[10] = "Motor OFF";
+
+	LCD_Command(0x11);  		//Set Cursor position
+	LCD_Command(0x00);			//Column Number
+	LCD_Command(0x01);			//Row Number
+	if (en)
+	{
+		// The motors are enabled, so display the state on the LCD
+		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+		HAL_SPI_Transmit(&hspi1, En_Str, strlen(En_Str), 50000);
+		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+	}
+	else
+	{
+		// The motors are disabled, so display the state on the LCD
+		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
+		HAL_SPI_Transmit(&hspi1, Dis_Str, strlen(Dis_Str), 50000);
+		HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
+	}
 }
 
 void LCD_24V_Error(void)
@@ -319,7 +346,7 @@ void LCD_RPM_Transmit(uint8_t * RPM_Val, int length)
 	LCD_Command(0x00);			//Column Number
 	LCD_Command(0x00);			//Row Number
 
-	/* String */
+	/* Sending String */
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 	HAL_SPI_Transmit(&hspi1, RPM_Str, strlen(RPM_Str), 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High
@@ -352,7 +379,6 @@ void LCD_Battery_Transmit(uint8_t Batt_Level)
 void LCD_Start_Screen(void)
 {
 	char Start_Str[16] = "SKYTANIC:FEV-60";
-	/* String */
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_RESET); //CS Low
 	HAL_SPI_Transmit(&hspi1, Start_Str, strlen(Start_Str), 50000);
 	HAL_GPIO_WritePin(GPIOC,GPIO_PIN_4,GPIO_PIN_SET); //CS High

@@ -56,6 +56,7 @@ typedef enum
 
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin);
 
 /* USER CODE BEGIN EFP */
 

@@ -28,8 +28,7 @@
 #include "string.h"
 
 uint8_t reps = 0;
-
-
+uint8_t screen = 0;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -72,24 +71,24 @@ int main(void)
 
 //   LCD_Reboot();
 //   LCD_Clear();
-   HAL_Delay(1000);
+	HAL_Delay(1000);
 
-   char test_rpm[] = "888";
+	char test_rpm[] = "888";
 
-   error_state = 0;
+	error_state = 0;
 
-   startup_flag = 0;
+	startup_flag = 0;
 
-	  LCD_Clear();
-	  LCD_Start_Screen();
-	  startup_flag = 1;
+	LCD_Clear();
+	LCD_Start_Screen();
+	startup_flag = 1;
 
-	  HAL_Delay(2000);
-	  LCD_Clear();
-	  LCD_RPM_Transmit(test_rpm, strlen(test_rpm));
-	  startup_flag = 2;
+	HAL_Delay(2000);
+	LCD_Clear();
+	LCD_RPM_Transmit(test_rpm, strlen(test_rpm));
+	startup_flag = 2;
 
-	  HAL_Delay(1000);
+	HAL_Delay(1000);
 
 	  // Check PGOOD signals
 	if((!(GPIOA->IDR & PGOOD_1_Pin)) || (!(GPIOA->IDR & PGOOD_2_Pin)))
@@ -100,14 +99,17 @@ int main(void)
 
   while (1)
   {
+	  //show different information based off of pilot's interaction with the system
+	  if (screen == 0)
+	  {
 		LCD_RPM_Transmit(rx_buffer,3);
-
-	  HAL_Delay(250);
-//		if(startup_flag == 2)
-//		{
-			LCD_Motor_Error(error_state);
-//		}
 		HAL_Delay(250);
+		LCD_Motor_Error(error_state);
+		HAL_Delay(250);
+	  }
+	  if (screen == 1){
+		  HAL_Delay(250);
+	  }
   }
   /* USER CODE END 3 */
 }
@@ -132,8 +134,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
-  */
+  /* Initializes the CPU, AHB and APB busses clocks */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
@@ -163,12 +164,16 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 			// Set the motor enables
 			HAL_GPIO_WritePin(MOTOR_DRIVER_1_ENABLE_PORT, MOTOR_DRIVER_1_ENABLE_PIN, GPIO_PIN_SET);
 			HAL_GPIO_WritePin(MOTOR_DRIVER_2_ENABLE_PORT, MOTOR_DRIVER_2_ENABLE_PIN, GPIO_PIN_SET);
+			// Show updated status on LCD
+			LCD_Motor_EN(1);
 		}
 		else
 		{
 			// Reset the motor enables
 			HAL_GPIO_WritePin(MOTOR_DRIVER_1_ENABLE_PORT, MOTOR_DRIVER_1_ENABLE_PIN, GPIO_PIN_RESET);
 			HAL_GPIO_WritePin(MOTOR_DRIVER_2_ENABLE_PORT, MOTOR_DRIVER_2_ENABLE_PIN, GPIO_PIN_RESET);
+			// Show updated status on LCD
+			LCD_Motor_EN(0);
 		}
 
 	}
@@ -178,7 +183,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 			LCD_24V_Error();
 		}
-		// If pin comes back high then turn off the LED
+		// If pin comes back high then turn off the LED error warning
 		else if(GPIOA->IDR & PGOOD_2_Pin)
 		{
 			HAL_GPIO_WritePin(GPIOF, PGOOD_24V_LED_Pin, GPIO_PIN_RESET);
@@ -191,13 +196,49 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 			LCD_24V_Error();
 		}
-		// If pin comes back high then turn off the LED
+		// If pin comes back high then turn off the LED error warning
 		else if(GPIOA->IDR & PGOOD_1_Pin)
 		{
 			HAL_GPIO_WritePin(GPIOF, PGOOD_24V_LED_Pin, GPIO_PIN_RESET);
 
 		}
 	}
+	if (GPIO_Pin == BUTTON_1_Pin)
+	{
+		//update pilot's screen prefrences and check for errors
+		screen = 0;
+		LCD_Clear();
+		if((!(GPIOA->IDR & PGOOD_1_Pin)) || (!(GPIOA->IDR & PGOOD_2_Pin)))
+		{
+			LCD_24V_Error();
+		}
+	}
+	if (GPIO_Pin == BUTTON_2_Pin)
+	{
+		//update pilot's screen prefrences and check for errors
+		screen = 1;
+		LCD_Clear();
+		LCD_Start_Screen();
+		if(GPIOC->IDR & SWITCH_1_Pin)
+		{
+			LCD_Motor_EN(1);
+		}
+		else
+		{
+			LCD_Motor_EN(0);
+		}
+	}
+	if (GPIO_Pin == BUTTON_3_Pin)
+	{
+		//extra button implementation that copies button 1 for debugging redudancy
+		screen = 0;
+		LCD_Clear();
+		if((!(GPIOA->IDR & PGOOD_1_Pin)) || (!(GPIOA->IDR & PGOOD_2_Pin)))
+		{
+			LCD_24V_Error();
+		}
+	}
+
 }
 
 
@@ -264,28 +305,32 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
 void HAL_TIM_PWM_PulseFinishedCallback(TIM_HandleTypeDef *htim){
 	//Timer reset
 	if (reps >20){
+		//if significant time has passed, walk through state machine
 		switch (usart_state){
 		case (Motor1TX):
 				CheckSystem();
 				break;
 		case (Motor1Recieve):
+				//Motor Driver 1 Failed its first communication
 				usart_state = Motor1Fail1;
 				CheckSystem();
 				break;
 		case (Motor1Fail1):
+				//Motor Driver 1 Failed its second communication so set error
 				error_state |= 0b01;
 				usart_state = Motor2TX;
 				CheckSystem();
-
 				break;
 		case (Motor2TX):
 				CheckSystem();
 				break;
 		case(Motor2Recieve):
+				//Motor Driver 2 Failed its first communication
 				usart_state = Motor2Fail1;
 				CheckSystem();
 				break;
 		case(Motor2Fail1):
+				//Motor Driver 2 Failed its second communication so set error
 				error_state |= 0b10;
 				usart_state = Motor1TX;
 				break;
